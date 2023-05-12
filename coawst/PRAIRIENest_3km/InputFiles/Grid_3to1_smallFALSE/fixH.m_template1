@@ -1,0 +1,32 @@
+ORIGFile = 'PRAIRIENest_3km_child.nc_ORIG';
+newFile  = 'PRAIRIENest_3km_child.nc';
+parentFile = 'PRAIRIENest_3km_parent.nc';
+
+unix(['cp ',ORIGFile,' ',newFile]);
+grdC = roms_get_grid(newFile);
+grdP  = roms_get_grid(parentFile);
+
+h = nc_varget(newFile,'h');
+
+hPrho = grdP.h;
+
+hCrho = grdC.h;
+hRhoOld = hCrho;
+fig(1);clf;pcolor(hCrho);shading flat;colorbar
+caxis([5760 5820])
+
+% put h on the parent psi grid
+[ny,nx] = size(grdP.mask_psi);
+hPpsi = zeros(ny,nx);
+for jj=1:ny; for ii=1:nx
+    hPpsi(jj,ii) = .25*( grdP.h(jj,ii) + grdP.h(jj,ii+1) + grdP.h(jj+1,ii) + grdP.h(jj+1,ii+1) );
+end;end;
+
+% put h on the child psi grid
+[ny,nx] = size(grdC.mask_psi);
+hCpsi = zeros(ny,nx);
+for jj=1:ny; for ii=1:nx
+    hCpsi(jj,ii) = .25*( grdC.h(jj,ii) + grdC.h(jj,ii+1) + grdC.h(jj+1,ii) + grdC.h(jj+1,ii+1) );
+end;end;
+
+

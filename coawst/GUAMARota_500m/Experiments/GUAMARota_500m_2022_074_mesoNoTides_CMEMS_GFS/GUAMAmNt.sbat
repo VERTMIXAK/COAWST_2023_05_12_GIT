@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --partition=t2small
+#SBATCH --ntasks=48
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=12:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+/bin/rm -r  netcdfOutput log 
+mkdir netcdfOutput
+NRREC=`grep NRREC Apps/ocean*.in | grep -v ! | cut -d "=" -f2 | cut -c 2`
+if [ $NRREC != "0" ]; then
+	lastData=`grep ININAME Apps/ocean*.in | grep -v ! | rev | cut -d / -f2 | rev`
+	cp $lastData/*rst.nc netcdfOutput
+    cp $lastData/*flt.nc netcdfOutput
+	ROI=`find Apps -name *.in | rev | cut -d . -f2 | cut -d _ -f1 |rev`
+	dum="_rst.nc"
+	sed -i "s/floats_$ROI.in/floats_$ROI$dum/" Apps/ocean_$ROI.in
+fi
+cp  ../../InputFiles/Gridpak/GUAMARota_500m.nc .
+mpirun -np 48  coawstROMSonly ./Apps/ocean_guamfinner_1km.in > log
+bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log
+cp log netcdfOutput
+cp Apps/ocean*.in  netcdfOutput

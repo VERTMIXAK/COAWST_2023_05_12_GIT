@@ -1,0 +1,18 @@
+#!/bin/bash
+#SBATCH --partition=t2small
+#SBATCH --ntasks=4
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=01:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+mkdir netcdfOutput
+cp  ../../InputFiles/Gridpak/GUAMHinner_1km.nc .
+mpirun -np 4  coawst_deadStill ./Apps/ocean_guamfinner_1km.in > log
+bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log
+cp log netcdfOutput
+cp Apps/ocean*.in  netcdfOutput

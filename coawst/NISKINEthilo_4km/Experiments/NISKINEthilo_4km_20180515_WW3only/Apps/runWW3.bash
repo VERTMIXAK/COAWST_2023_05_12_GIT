@@ -1,0 +1,359 @@
+#!/bin/bash
+source ~/.runROMSintel
+
+export INTEL_LICENSE_FILE=28518@license.rcs.alaska.edu
+
+# Make the process interactive
+read -r -p "Interactive? [y/n] " interactive
+
+printenv | grep -i license
+echo " "
+echo " "
+
+# netcdf defs are in coaswt.bash now
+#printenv |grep NETCDF
+#export NETCDF=/usr/local/pkg/netcdf/netcdf-4.3.0.intel-2016
+#export NETCDF_INCDIR=/usr/local/pkg/netcdf/netcdf-4.3.0.intel-2016/include
+
+export PATH=$PATH\:~/bin:.
+export LD_LIBRARY_PATH=$HOME/PyCNAL_fromKate/site-packages:$LD_LIBRARY_PATH
+export PYCNAL_GRIDID_FILE=$HOME/Python/gridid.txt
+export PYCNAL_GRID_FILE=$HOME/Python/gridid.txt
+export PYCNAL_PATH=$HOME/Python
+export XCOASTDATA=/import/c/w/jpender/ROMS/BathyData/world_int.cst
+export ETOPO2=/import/c/w/jpender/ROMS/BathyData/etopo2.Gridpak.nc
+export TOPO30=/import/c/w/jpender/ROMS/BathyData/topo30.Gridpak_TS.nc
+export TOPO30TS=/import/c/w/jpender/ROMS/BathyData/topo30.Gridpak_TS.nc
+export INDIANO2=/import/c/w/jpender/ROMS/BathyData/indiano2.Gridpak.nc
+export PALAU_HIRES=/import/c/w/jpender/ROMS/BathyData/Palau_hires.nc 
+
+umask 0027
+
+
+
+
+clear
+
+echo ""
+echo ""
+echo ""
+
+
+ROMSdir=`pwd`
+#echo $ROMSdir
+
+ROI="NISKINEthilo"
+#ROI="SEAKp"
+#ROI="NG"
+
+#gridRes="0.015625"
+#gridRes="0.03125"
+#gridRes="1km"
+#gridRes="2km"
+gridRes="4km"
+#gridRes="UH"
+#gridRes="500m"
+
+
+# pick one and only one option from this set
+#exptMode="noForcing"
+#exptMode="tidesOnly"
+#exptMode="meso"
+#exptMode="mesoTides_LMD"
+#exptMode="mesoNoTides"
+#exptMode="mesoNoTides_LMD"
+#exptMode="meso_Eig"
+#exptMode="tidesOnly_Eig"
+#exptMode="meso_UHdirect"
+#exptMode="mesoNotides_GLS_CHARNOK_CRAIG"
+#exptMode="mesoNoTides_LMD_ROMSonly"
+exptMode="WW3only"
+
+exptname=`echo $ROI"_"$gridRes | tr "[A-Z]" "[a-z]"`
+echo $exptname
+gridName=$ROI"_"$gridRes
+
+Appsdir="Apps/"$gridName"/"
+compileInputFile=$Appsdir$exptname".h"
+###runInputFile=$Appsdir"ocean_"$exptname".in"
+runRestartFile=$runInputFile"_restart"
+varinfoFile="./Apps/varinfo_LOCAL.dat"
+
+#echo $compileInputFile"_"$exptMode
+
+printf "cp $compileInputFile"_"$exptMode \t\t$compileInputFile\n"
+cp $compileInputFile"_"$exptMode $compileInputFile
+
+###printf "cp $runInputFile"_"$exptMode  \t$runInputFile\n"
+###cp $runInputFile"_"$exptMode     $runInputFile
+
+#printf "cp $varinfoFile"_*"  \t$varinfoFile\n"
+#cp $varinfoFile"_"$exptMode     $varinfoFile
+
+
+#!!!!!!!!!!!!!!!!!!!!!!!
+# Optional note to append to the experiment name
+nameAppend=""
+#nameAppend="_fixFloats"
+#nameAppend="_wetdry"
+#nameAppend="_addRivers"
+#nameAppend="_LMD"
+#nameAppend="_addPvort"
+#nameAppend="_SurfFOff"
+#nameAppend="_mesoStart_LBCoff_SURFoff"
+#nameAppend="_nud1_tryDIAGS"
+#nameAppend="_IceFloats_modifyFloats"
+#nameAppend="_IceOnly"
+#nameAppend="_IceDye"
+#nameAppend="_IceandDyeandFloats"
+#nameAppend="_recheckSpeedWithoutFloats"
+#nameAppend="_noFloats"
+#nameAppend="_GLS_riverdye_CHARNOK_CRAIG"
+#nameAppend="_GLS_rivers_noDye_Hill"
+#nameAppend="_LMD_addRivers"
+#nameAppend="_wetDryOn"
+#nameAppend="_newDyeLBC"
+#nameAppend="_GLS_CRAIG_CHARNOK"
+#nameAppend="_SourceDataAlreadyHasTides"
+nameAppend="timeTrial"
+nameAppend=""
+echo "optional note on file name is " $nameAppend
+
+
+echo ""
+
+echo "experiment mode:    " $exptMode
+echo "grid name:          " $gridName
+echo "compile input file: " $compileInputFile
+echo "run input file:     " $runInputFile
+echo "restart input file: " $runRestartFile
+echo "varinfo file:       " $varinfoFile
+echo "name append:        " $nameAppend
+echo ""
+
+
+echo "experiment mode is $exptMode"
+echo " "
+
+
+
+# Get expt start date from input files.
+cp $Appsdir/WW3_config/ww3_shel.inp_template $Appsdir/WW3_config/ww3_shel.inp
+
+startDate=`grep '\$\$1' $Appsdir/WW3_config/ww3_shel.inp | tr -s ' ' | tr ' ' ',' | cut -d ',' -f2`
+echo "startDate $startDate"
+
+endDate=`grep '\$\$2' $Appsdir/WW3_config/ww3_shel.inp | tr -s ' ' | tr ' ' ',' | cut -d ',' -f2`
+echo "endDate $endDate"
+echo ' '
+
+sed -i "s/myStartDate/$startDate/" $Appsdir/WW3_config/ww3_shel.inp
+sed -i "s/myEndDate/$endDate/" $Appsdir/WW3_config/ww3_shel.inp
+
+
+# If the experiment directory already exists then exit
+
+exptName=$gridName"/Experiments/"$gridName"_"$startDate"_"$exptMode$nameAppend
+echo "experiment name is"
+echo $exptName
+
+if [ -e $exptName ]; then
+        echo "you already have an experiment with this name"
+        exit 1
+fi
+
+
+
+# Verify grid size
+
+gridDir="$gridName/InputFiles/Gridpak/"
+gridParam=`grep Lm $gridDir/Include/gridparam.h |grep -v integer | tr -s ' ' | tr ' ' ',' `
+#echo $gridParam
+Lm=`echo $gridParam | cut -d ',' -f4 | cut -d '=' -f2 | cut -d ' ' -f1  `
+Mm=`echo $gridParam | cut -d ',' -f7 | cut -d '=' -f2 | cut -d ' ' -f1  `
+Lmplus=`echo " $Lm + 2 " | bc `
+Mmplus=`echo " $Mm + 2 " | bc `
+
+
+echo $Lmplus $Mmplus
+
+lm=`grep '\$\$3' $Appsdir/WW3_config/ww3_grid.inp | tr -s ' ' | tr ' ' ',' | cut -d ',' -f2`
+mm=`grep '\$\$3' $Appsdir/WW3_config/ww3_grid.inp | tr -s ' ' | tr ' ' ',' | cut -d ',' -f3 | cut -d '\$' -f1 | cut -d ' ' -f1`
+echo $lm $mm
+
+
+# spot check
+case $interactive in
+    [yY][eE][sS]|[yY])
+
+  read -r -p "Everything OK? [Y/n] " input
+
+  case $input in
+     [nN][oO]|[nN])
+  exit 1
+       ;;
+  esac
+
+  ;;
+esac
+
+
+
+
+
+#!!!!!!!!!!!!!!
+# put exit here to stop before compile
+
+
+#exit
+
+#mkdir $exptName
+#mkdir $exptName/Apps
+
+
+
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# compile ROMS and move the executable to the experiment directory
+
+cp ./coawst.bash_TEMPLATE coawst.bash
+
+# update the COAWST_APPLICATION variable
+sed -i "s/XXXX/$gridName/" coawst.bash
+
+
+echo ""   
+echo "" 
+echo ""
+
+
+## make the debug copy first
+#echo "about to clean and then compile romsG"
+#sed -i '/USE_DEBUG ?=/c\   USE_DEBUG ?= on' makefile
+#make clean
+#make -j 8 > makelogG
+    
+#exit
+
+
+
+# here is the actual compile part
+echo "compile"
+./coawst.bash
+echo "done with compile"
+
+#exit
+
+echo "about to create expt directory"
+
+if [ -f coawstM ] || [ -f coawstG ]; then
+
+	mkdir $exptName
+	mkdir $exptName/Apps
+
+	mv coawstM $exptName
+    mv coawstG $exptName
+#	mv makelogM $exptName
+#    mv makelogG $exptName
+else
+	echo "Compile problem, dude."
+	exit
+fi
+
+echo "done with compiles"
+
+
+
+cp $Appsdir/*.h 		$exptName/Apps
+cp runWW3.bash 		$exptName/Apps
+cp -r $Appsdir/WW3_config 	$exptName/Apps
+
+
+# move to the experiment directory and tidy up
+
+cd $exptName
+pwd
+
+
+mv coawstM coawstWW3only
+cp -r Apps/WW3_config/* .
+
+
+# create the batch script and start the job
+
+
+
+
+wallTime="12:00:00"
+nProc=` echo " 612 * 376 / 2000" | bc `
+
+
+#echo "np is " $np
+echo "wallTime is " $wallTime
+echo "number of processors is "$nProc
+#echo "number of nodes is " $nNodes
+
+echo " "
+echo "NOTE: this is a $runDays day run and the requested wall time is $wallTime using $nProc processors"
+echo " "
+
+
+
+    batName=$ROI".sbat"
+    echo $batName
+
+
+    echo "#!/bin/bash" 																					> $batName
+    echo '#SBATCH --partition=t2standard'               												>>$batName
+#    echo '#SBATCH --partition=t2small'              													>>$batName 
+    echo '#SBATCH --ntasks='$nProc            															>>$batName
+    echo '#SBATCH --mail-user=jgpender@alaska.edu'     													>>$batName
+    echo '#SBATCH --mail-type=BEGIN'      																>>$batName
+    echo '#SBATCH --mail-type=END'      																>>$batName
+    echo '#SBATCH --mail-type=FAIL'      																>>$batName
+    echo '#SBATCH --time='$wallTime      																>>$batName
+    echo '#SBATCH --output=roms.%j'      																>>$batName
+
+    echo 'source ~/.runROMSintel'                   													>>$batName
+
+    echo 'ulimit -l unlimited'                         													>>$batName
+    echo 'ulimit -s unlimited'                        													>>$batName
+
+
+    echo '/bin/rm -r  netcdfOutput log '		            											>>$batName
+    echo 'mkdir netcdfOutput'																			>>$batName
+    echo 'mkdir restartDir'                                                                             >>$batName
+
+
+
+#	echo "cp `grep GRDNAME Apps/ocean*.in | grep -v '!' | cut -d '=' -f3` ."         					>>$batName
+
+
+    echo "mpirun -np $nProc  coawstWW3only ww3_grid.inp > log"   										>>$batName 
+
+#    echo "bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log" 	>>$batName
+    echo "~/coawst/WW3/model/exe/ww3_ounf"                                                              >>$batName
+    echo "mv ww3.*.nc netcdfOutput"																		>>$batName
+	echo "mv restart*.ww3 restartDir"	   																>>$batName
+#    rm nodes.*
+
+
+cp ../../InputFiles/WW3_*/ww* . 
+
+~/coawst/WW3/model/exe/ww3_grid # > log.grid
+~/coawst/WW3/model/exe/ww3_strt # > log.strt
+~/coawst/WW3/model/exe/ww3_prnc # > log.prnc
+
+
+sbatch $batName
+
+
+echo "again, the experiment name is"
+echo $exptName
+
+
+
+
+
+
+

@@ -1,0 +1,53 @@
+chinook> bathsuds 
+ There are            4  bathymetries.
+ Which level would you like to read?
+2
+  udeg   =   8.1095695495605469E-003
+  uscale =   13711138.975403510     
+  Enter number of passes of filter:
+2
+           1  rmax =   0.70006539761001441       at (i,j):           80          48
+ depths:    20.000012644273010        113.36247694449597        20.071926160097874     
+           2  rmax =   0.52093449621257470       at (i,j):           73          35
+ depths:    50.196094442066340        159.36228137595015        46.571054541866502     
+
+ JGP print gridfile SDd_2km.nc                                                                      
+ There are            4  bathymetries.
+ Which level would you like to write to?
+3
+chinook> bathsoap 
+ There are            4  bathymetries.
+ Which level would you like to read?
+3
+  udeg   =   8.1095695495605469E-003
+  uscale =   13711138.975403510     
+
+ How many passes of the shapiro filter?
+1
+           1  rmax =   0.49955611696425495       at (i,j):           73          34
+
+ JGP print gridfile SDd_2km.nc                                                                      
+ There are            4  bathymetries.
+ Which level would you like to write to?
+4
+chinook> sphere
+ There are            4  bathymetries.
+ Which level would you like to read?
+4
+
+ JGP sees spherical == 1 
+
+ ncgridid =       65536
+
+ varid =          16
+
+ TRIM(gridfile) =  SDd_2km.nc
+
+ print4          0
+  udeg   =   8.10956955E-03
+  uscale =   13711139.0    
+ average dx    2002.4465632441074     
+ minimum dx =    2001.2829237422368     
+ average dy    1996.2267592762307     
+ minimum dy =    1995.1224507197035     
+

@@ -1,0 +1,114 @@
+oldGrid = 'GUAMJinner_1km.nc_regMask';
+newGrid = 'GUAMJinner_1km_edgeSmoothing.nc';
+newGrid2= 'GUAMJinner_1km.nc'
+
+unix(['cp ',oldGrid,' ',newGrid]);
+
+h = nc_varget(newGrid,'h');
+hOrig=h;
+[ny,nx] = size(h);
+
+fig(1);clf;
+pcolor(h);shading flat
+
+fig(2);clf;
+plot(h(43,:))
+
+fig(3);clf;
+plot( h(1:20,50))
+
+fig(4);clf;
+plot(h(43,end-20:end))
+
+fig(5);clf;
+pcolor(h(40:47,end-7:end));shading flat;colorbar
+
+dumOrig = h(1:20,50);
+
+%% work
+% This particular grid has telescoping bands 6 pixels wide on the N and S
+% edges and 15 pixels wid on the E and W edges.
+
+% Start with a 3x3 average centered one pixel in from the perimeter.
+
+% % N and S edges
+% for ii=2:nx-1
+%     h(1:3,ii-1:ii+1);  h(2,ii) = mean(ans(:));
+%     h(end-2:end,ii-1:ii+1);  h(end-1,ii) = mean(ans(:));
+% end;
+% 
+% % E and W edges
+% for jj=2:ny-1
+%     h(jj-1:jj+1,1:3); h(jj,2) = mean(ans(:));
+%     h(jj-1:jj+1,1:3); h(jj,end-1) = mean(ans(:));
+% end;
+
+
+
+% work from the interior to the N/S edges
+edge = 7;
+
+% for jj=2:edge
+for jj=edge:-1:2
+    for ii=2:nx-1
+       h(jj-1:jj+1,ii-1:ii+1);  h(jj,ii) = mean(ans(:));
+    end;
+end;
+
+% for jj=ny-edge+1:ny-1
+for jj=ny-1:-1:ny-edge+1
+    for ii=2:nx-1
+       h(jj-1:jj+1,ii-1:ii+1);  h(jj,ii) = mean(ans(:));
+    end;
+end;
+
+
+% work in from the E/W edges
+edge = 18;
+
+% for ii=2:edge
+for ii=edge:-1:2
+    for jj=2:ny-1
+        h(jj-1:jj+1,ii-1:ii+1); h(jj,ii) = mean(ans(:));
+    end;
+end;
+
+% for ii=nx-edge+1:nx-1
+for ii=nx-1:-1:nx-edge+1
+    for jj=2:ny-1
+        h(jj-1:jj+1,ii-1:ii+1); h(jj,ii) = mean(ans(:));
+    end;
+end;
+
+
+
+
+% Perimeter
+h(2:end-1,1)   = h(2:end-1,2);
+h(2:end-1,end) = h(2:end-1,end-1);
+h(1,:)         = h(2,:);
+h(end,:)       = h(end-1,:);
+
+
+%% Plots and write to file
+
+fig(12);clf;
+plot(h(44,:))
+
+fig(13);clf;
+plot( h(1:20,50))
+
+fig(14);clf;
+plot(h(44,end-20:end))
+
+fig(15);clf;
+imagesc(h(40:47,end-7:end));axis xy;colorbar
+
+fig(11);clf;
+pcolor(h);shading flat
+
+fig(21);clf;
+pcolor(h-hOrig);shading flat;colorbar
+
+
+nc_varput(newGrid,'h',h);

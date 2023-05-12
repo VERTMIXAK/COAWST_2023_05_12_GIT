@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --partition=t2small
+#SBATCH --ntasks=1
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=06:00:00
+#SBATCH --output=roms.%j
+
+source ~/.runPycnal
+ulimit -l unlimited
+ulimit -s unlimited
+
+python bry08.py

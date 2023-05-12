@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH --partition=t2small
+#SBATCH --ntasks=6
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=96:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+/bin/rm -r  netcdfOutput log 
+mkdir netcdfOutput
+
+cp  ../../InputFiles/Gridpak/SDc_4km.nc .
+mpirun -np 6  coawstROMSonly ./Apps/ocean_sdc_4km.in > log
+bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log
+cp log netcdfOutput
+cp Apps/ocean*.in  netcdfOutput

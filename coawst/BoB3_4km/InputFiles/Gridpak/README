@@ -1,0 +1,25 @@
+This is kind of a weird one. I needed to make the minimum depth small (5m) in order to fix the huge tidal amplitudes. 
+The source bathymetry is new, and it's a bit scratchy so I could never get bathsuds to give r<.3.
+The solution is a little bit of a cheat. 
+
+I ran bathtub and used hraw(1) and hraw(2) as usual.
+
+Then I used matlab to smooth hraw(2) a little with   smoothHaBit.m
+
+		lowpass(lowpass(hold',2)',2)
+
+and then wrote the result into hraw(3)			<---- This right here is where I diverge from normal
+
+Then I ran bathsuds, which now works OK, and wrote the result into hraw(4)
+
+Then I ran bathsoap, and put the result into hraw(5)
+
+Finally, I run sphere and use hraw(5)
+
+
+
+This is Bob3_4km_noRivers.nc
+
+Then add the river channels.
+
+

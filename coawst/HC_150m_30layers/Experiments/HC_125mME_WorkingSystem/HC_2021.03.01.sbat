@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=t2standard
+#SBATCH --ntasks=108
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=02:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+
+\rm -r netcdfOutput_2021.03.01
+mkdir netcdfOutput_2021.03.01
+
+mpirun -np 108 ./coawstM ocean_2021.03.01.in > log_2021.03.01
+bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log_2021.03.01
+mv log_2021.03.01 netcdfOutput_2021.03.01

@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=t2standard
+#SBATCH --ntasks=115
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=12:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+/bin/rm -r  netcdfOutput log 
+mkdir netcdfOutput
+mkdir restartDir
+mpirun -np 115  coawstWW3only ww3_grid.inp > log
+~/coawst/WW3/model/exe/ww3_ounf
+mv ww3.*.nc netcdfOutput
+mv restart*.ww3 restartDir

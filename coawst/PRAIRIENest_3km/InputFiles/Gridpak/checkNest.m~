@@ -1,0 +1,36 @@
+clear;close all;tabwindow;
+
+parentFile = 'PRAIRIEinner_1km.nc';
+nestFile   = 'PRAIRIEinnerNest_1km.nc';
+
+hParent    = nc_varget(parentFile,'h');
+lonParent  = nc_varget(parentFile,'lon_rho');
+latParent  = nc_varget(parentFile,'lat_rho');
+maskParent = nc_varget(parentFile,'mask_rho');
+
+hNest    = nc_varget(nestFile,'h');
+lonNest  = nc_varget(nestFile,'lon_rho');
+latNest  = nc_varget(nestFile,'lat_rho');
+maskNest = nc_varget(nestFile,'mask_rho');
+
+jCoreLL=119;
+iCoreLL=171;
+jCoreUR=217;
+iCoreUR=224;
+
+lonParent(jCoreLL+1,iCoreLL+1)
+lonNest(1+2,1+2)
+
+
+%%
+
+fig(1);clf;
+pcolorjw(lonNest,latNest,hNest)
+
+delta=10;
+fig(2);clf;
+pcolorjw(lonParent(jCoreLL-delta:jCoreUR+delta,iCoreLL-delta:iCoreUR+delta), ...
+    latParent(jCoreLL-delta:jCoreUR+delta,iCoreLL-delta:iCoreUR+delta) ...
+    ,hParent(jCoreLL-delta:jCoreUR+delta,iCoreLL-delta:iCoreUR+delta))
+
+xlim(lon

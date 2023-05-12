@@ -1,0 +1,9 @@
+      character*2   JPRJ, JLTS
+      real          PLAT, PLONG, ROTA, P1, P2, P3, P4, XOFF, YOFF
+      integer       JGRD
+      parameter  (  JPRJ = 'LC', PLAT =  13.00000, &
+     &              PLONG = 86.2500000, ROTA = 20.000000, &
+     &              JLTS = 'CO', P1 =  10.500000, &
+     &              P2 = 80.00000, P3 = 22.500000, &
+     &              P4 = 92.500000, JGRD = 5)
+      parameter  (  XOFF = 0.,  YOFF = 0.)

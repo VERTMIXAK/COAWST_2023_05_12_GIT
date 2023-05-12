@@ -1,0 +1,20 @@
+I need a better way to get river temperature. The python script writes a constant value for temperture at every point 
+along the coast, as per a 12-element vector of mid-month times. Harper would rather use the local air temperature, which
+will vary from place to place.
+
+I think the way to do this is in a matlab script.
+
+0) get rid of all the islands in maskedge.out
+
+
+1) go ahead and let the python script write temp and salt and dye to the river forcing file because this 
+will properly size the netcdf container.
+
+2) then run a matlab script that overwrites the temperature data.
+
+The air temperature comes from JRA source data in
+
+~/roms/GlobalDataFile/JRA_BoB/xxx.Tair.nc
+
+I have created a new version of this data file that has 12 snapshots of the data, each of which is the average for
+a month. I need a matlab script that interpolates this data onto the lat/lon for each position on the coast.

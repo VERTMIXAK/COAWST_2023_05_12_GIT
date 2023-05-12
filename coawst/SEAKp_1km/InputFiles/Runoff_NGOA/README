@@ -1,0 +1,89 @@
+Steps for creating a ROMS rivers file from this runoff file
+
+ROMS SIDE PREP
+
+1. First, the maskedge program needs to be run on the ROMS grid file.
+It produces a list of the i,j pairs along the edge of the land mask.
+Save it in a file and edit out the parts of the land mask you don't
+want included (here, i<209). Call this file maskedge.out.
+
+    python maskedge.py $ARCHIVE/gridpak/Cook_inlet/NWGOA_grid_3.nc > maskedge.out
+STDERR:  New body! 1 1
+STDERR:  There are 1  bodies of water.
+
+2. Run the add_rivers program to create the ROMS file of i,j river
+locations:
+
+    python add_rivers.py NWGOA3_rivers.nc
+
+add_rivers.py can have a cycle_length of 365.25. Removed here.
+
+HILL AND BEAMER SIDE PREP
+
+4. The new file format is coast cells only. With help from Fred,
+I got the thing working in the test_regrid.ipynb notebook, straight
+onto the ROMS grid.
+
+    python test_regrid.py
+
+runoff_raw is to any ROMS point, then runoff is to coastal points
+only. Needs get_littoral2, a slight change to get_littoral.
+
+6b. (optional) This is to split some big rivers to flow into more than
+one grid box. (not used in this domain)
+
+    python hack_runoff_clim.py
+
+7. Phase two onto the ROMS rivers file:
+
+    python make_river_clim.py
+
+Like add_rivers, this has been hacked for an annual cycle.
+Also to fix a units problem (ROMS wants m^3/sec).
+
+8. This can be dangerous! You want all years to have the same number of rivers,
+not true in the arctic with JRA, so I'm not doing it any more. Put this before tracers:
+
+    python squeeze_rivers.py NWGOA_rivers.nc squeeze.nc
+    mv squeeze.nc NWGOA_rivers.nc
+
+9. Then there's the tracers... Seth gave me one year of daily values to
+be reused year after year. We need a second, cyclic river_time.
+Plus we need to hack ROMS to accept only one value per day - the new
+ONE_TRACER_SOURCE flag.
+
+    python add_temp.py NWGOA_rivers.nc
+    python set_temp.py NWGOA_rivers.nc
+
+Not sure why this latter is needed, but it is for now.
+
+10. Finally, setting Vshape:
+
+    python set_vshape.py NWGOA_rivers.nc
+
+11. If using dyes:
+
+    python add_dye.py
+
+12. Then there's the BGC stuff in /import/archive/u1/uaf/kate/NWGOA3/Rivers
+
+CHANGING THE LAND MASK
+
+If one changes the ROMS land mask, not all the steps need to be repeated.
+You do need to rerun steps 1 and 2. [The remapping files change.]
+Half of step 10a needs to be redone (runoff_raw to runoff), but you
+can redo all of step 10a or edit that script. Then steps 11, 12, 13 all
+need to be redone, making sure that steps 10b and 13 have the correct
+river locations.
+
+OTHER YEARS (out of date)
+
+1. Copy an empty NWGOA_rivers_xxx.nc file to the years needed.
+2. Run "python mask_flow.py" on discharge file, hacking leap years as needed.
+3. "python make_runoff_clim.py" to get gridded ROMS file.
+4. "python hack_runoff_clim.py" to change big rivers.
+5. "python make_river_clim.py" to fill ROMS river file from step 1.
+6. "python add_temp.py NWGOA_rivers_1998_1999.nc"
+7. "python set_vshape.py NWGOA_rivers_2000_2001.nc"
+
+8. "python add_dye.py" if using dyes.

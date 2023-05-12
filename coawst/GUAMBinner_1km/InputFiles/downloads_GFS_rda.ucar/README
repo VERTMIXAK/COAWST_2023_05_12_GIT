@@ -1,0 +1,9 @@
+Most of these fields are on a regular 3-hour cycle.
+
+Three of the fields
+
+	albedo, swrad, lwrad_down
+
+are 6-hour averages, so I probably ought to game the time stamp to be in the middle of the interval.
+I may also need to grab a time stamp from the end of the previous day.
+

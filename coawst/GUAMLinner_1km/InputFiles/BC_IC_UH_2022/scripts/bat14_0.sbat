@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#source ~/.runPycnal
+#module load slurm
+
+#SBATCH --partition=t2small
+#SBATCH --ntasks=1
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=10:00:00
+#SBATCH --output=allFour.%j
+
+source ~/.runPycnal
+module load slurm
+ulimit -l unlimited
+ulimit -s unlimited
+python bry14_0.py

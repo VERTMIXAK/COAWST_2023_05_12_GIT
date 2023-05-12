@@ -1,0 +1,5 @@
+PALAU_800m/Experiments/PALAU_800m___mesoNoTides_M2
+The idea here is to redo an old experiment
+  /archive/u1/uaf/jgpender/roms-kate_svn/TS_0.03125/ExperimentsTS_0.03125_2015_001_TidesM2_10plus5days_tidesOnly
+with a different bathy smoothing. The grid file has
+14 layers in hmax, so the point is to put a different one of these into h.

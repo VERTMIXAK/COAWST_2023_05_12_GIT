@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --partition=t2standard
+#SBATCH --ntasks=96
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=12:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+/bin/rm -r  netcdfOutput log 
+mkdir netcdfOutput
+cp  ../../InputFiles/Gridpak/PALAU_800m.nc .
+mpirun -np 96  coawst_mesoNoTides_noAVERAGES ./Apps/ocean_palau_800m.in > log
+bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log
+cp log netcdfOutput
+cp Apps/ocean*.in  netcdfOutput
+
+/bin/bash addAtt.bash
+
+/bin/bash rename.bash
+
+cd /import/c1/VERTMIX/jgpender/coawst/PALAU_800m/Experiments/AccumulatedData_PALAU_800m_2022/netcdfOutput
+/bin/bash doAverages.bash

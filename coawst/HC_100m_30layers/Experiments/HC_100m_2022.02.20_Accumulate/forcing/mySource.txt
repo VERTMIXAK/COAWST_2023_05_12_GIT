@@ -1,0 +1,29 @@
+pwd
+ncks -O -d river_time,7 ../../HC_100m_2022.02.21/forcing/rivers.nc rivers02.21.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.02.22/forcing/rivers.nc rivers02.22.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.02.23/forcing/rivers.nc rivers02.23.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.02.24/forcing/rivers.nc rivers02.24.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.02.25/forcing/rivers.nc rivers02.25.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.02.26/forcing/rivers.nc rivers02.26.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.02.27/forcing/rivers.nc rivers02.27.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.02.28/forcing/rivers.nc rivers02.28.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.01/forcing/rivers.nc rivers03.01.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.02/forcing/rivers.nc rivers03.02.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.03/forcing/rivers.nc rivers03.03.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.04/forcing/rivers.nc rivers03.04.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.05/forcing/rivers.nc rivers03.05.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.06/forcing/rivers.nc rivers03.06.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.07/forcing/rivers.nc rivers03.07.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.08/forcing/rivers.nc rivers03.08.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.09/forcing/rivers.nc rivers03.09.nc
+ncks -O -d river_time,7 ../../HC_100m_2022.03.10/forcing/rivers.nc rivers03.10.nc
+ncrcat -O rivers??.??.nc rivers.nc
+ncrcat -O ../../HC_100m_2022.??.??/forcing/Pair.nc Pair.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/Qair.nc Qair.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/Tair.nc Tair.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/Uwind.nc Uwind.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/Vwind.nc Vwind.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/rain.nc rain.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/lwrad_down.nc lwrad_down.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/swrad.nc swrad.nc_ORIG
+ncrcat -O ../../HC_100m_2022.??.??/forcing/HC_bdry.nc HC_bdry.nc_ORIG

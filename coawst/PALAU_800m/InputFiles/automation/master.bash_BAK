@@ -1,0 +1,86 @@
+#!/bin/bash
+
+source /import/home/jgpender/.runROMSintel
+
+# do a little subsetting on frinkiac
+ssh jgpender@frinkiac.oceanmodeling.net '/bin/bash autoPALAU_800m_2.bash'
+
+/bin/rm  *.nc  log */doneFlag.txt *reduce.nc
+
+# download files from frinkiac
+/usr/bin/scp jgpender@frinkiac.oceanmodeling.net:transfer/HIS0_reduce.nc HIS0.nc
+/usr/bin/scp jgpender@frinkiac.oceanmodeling.net:transfer/HISend_reduce.nc .
+/usr/bin/scp jgpender@frinkiac.oceanmodeling.net:transfer/bry.nc .		
+/usr/bin/scp jgpender@frinkiac.oceanmodeling.net:transfer/surfaceTSUVZ_reduce.nc .	
+
+/bin/bash fixDate.bash
+
+
+# there are frinkiac bry files:
+#	assim_bry.nc	dates all precede "today"
+#	fore_bry.nc		dates begin at "today"
+# the last date in assim_bry.nc used to be repeated in the first snapshot
+# of fore_bry.nc, but this doesn't seem to be the case any more 
+
+# Current procedure: ncrcat the bry files together on frinkiac and download
+
+echo "a" > log
+#/usr/bin/ncks -O -d bry_time,0,71 assim_bry.nc dum.nc
+#echo "b" >> log
+#/usr/bin/ncrcat dum.nc fore_bry.nc bry.nc
+#echo "c" >> log
+#\rm dum.nc
+
+
+
+echo "cc" >> log
+
+cd ini
+/bin/bash makeINI.bash  &
+cd ..
+
+echo "d" >> log
+
+cd GFS_PALAU_forecast
+/bin/bash download.bash   &
+cd ..
+
+echo "e" >> log
+
+# make subsetted versions of Brian's first and last snapshots while I'm waiting
+
+\rm *reduce.nc
+
+oldFile=HISend.nc
+newFile=HISend_reduce.nc
+ncks -d xi_rho,206,280 -d eta_rho,42,112 -d xi_psi,206,280 -d eta_psi,42,112 -d xi_u,206,280 -d eta_u,42,112 -d xi_v,206,280 -d eta_v,42,112 $oldFile $newFile
+
+oldFile=HIS0.nc
+newFile=HIS0_reduce.nc
+ncks -d xi_rho,206,280 -d eta_rho,42,112 -d xi_psi,206,280 -d eta_psi,42,112 -d xi_u,206,280 -d eta_u,42,112 -d xi_v,206,280 -d eta_v,42,112 $oldFile $newFile
+
+oldFile=surfaceTSUVZ.nc
+newFile=surfaceTSUVZ_reduce.nc
+ncks -d xi_rho,206,280 -d eta_rho,42,112 -d xi_psi,206,280 -d eta_psi,42,112 -d xi_u,206,280 -d eta_u,42,112 -d xi_v,206,280 -d eta_v,42,112 $oldFile $newFile
+
+
+# wait for the IC and surface forcing files to finish
+
+while [ ! -f ./ini/doneFlag.txt ] 
+do
+	sleep 10
+done
+
+echo "f" >> log
+
+while [ ! -f ./GFS_PALAU_forecast/doneFlag.txt ]
+do
+    sleep 10
+done
+
+echo "g" >> log
+
+/bin/bash work.bash
+
+
+echo "done" >> log

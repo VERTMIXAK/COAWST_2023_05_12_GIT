@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --partition=t2standard
+#SBATCH --ntasks=140
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=12:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+mpirun -np 140  coawstROMSonly_deadStill ./Apps/ocean_guamfinner_1km.in > log
+bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log
+cp log netcdfOutput
+cp Apps/ocean*.in  netcdfOutput

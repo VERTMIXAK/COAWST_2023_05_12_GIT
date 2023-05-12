@@ -1,0 +1,8 @@
+1) First of all, change the minimum depth in bathtub from 5 to 50.
+
+
+2) run Harper's hls_butterworth script on minimum -    1/3
+
+3) run bathsuds with 3 iterations
+
+4) run bathsoap with 1 iteration

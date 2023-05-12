@@ -1,0 +1,39 @@
+The grid file bathymetry was smoothed with
+	2 iterations of bathsuds and 1 iteration of bathsoap
+
+
+chinook> bathsuds 
+ There are            4  bathymetries.
+ Which level would you like to read?
+2
+  udeg   =   1.7453514039516449E-002
+  uscale =   6370719.0926123476     
+  Enter number of passes of filter:
+2
+           1  rmax =   0.64311579376300765       at (i,j):           35           5
+ depths:    47.227477563610080        217.43807354933676        147.51828618006761     
+           2  rmax =   0.39987149388342341       at (i,j):           35           5
+ depths:    130.91266470939598        305.36944278964637        267.21618196432729     
+
+ JGP print gridfile SDc_8km.nc                                                                      
+ There are            4  bathymetries.
+ Which level would you like to write to?
+3
+chinook> bathsoap 
+ There are            4  bathymetries.
+ Which level would you like to read?
+3
+  udeg   =   1.7453514039516449E-002
+  uscale =   6370719.0926123476     
+
+ How many passes of the shapiro filter?
+1
+           1  rmax =   0.42558856301666759       at (i,j):           35           5
+
+ JGP print gridfile SDc_8km.nc                                                                      
+ There are            4  bathymetries.
+ Which level would you like to write to?
+4
+
+
+

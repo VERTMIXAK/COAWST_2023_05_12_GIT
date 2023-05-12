@@ -1,0 +1,49 @@
+There is a second option for freshwater data for this SEAK domain.
+
+/import/AKWATERS/kshedstrom/hydroflow/new_2019
+
+It is not global - just the Gulf of Alaska. Unfortunately it doesn't use the same data organization as the JRA
+source files, so the scripts are not quite the same. Here is a directory in Kate space with all kinds 'o stuff:
+
+chinook> pwd
+/import/AKWATERS/kshedstrom/hydroflow/NWGOA3
+chinook> ls
+add_rivers.py			 			NGOA_rivers_2002_2003.nc  README
+add_temp.py			 				NGOA_rivers_2004_2005.nc  remap_grid_NWGOA3_rho.nc
+compute_hill_remap_weights_2.py  	NGOA_rivers_2006_2007.nc  remap_grid_runoff.nc
+compute_hill_remap_weights.py	 	NGOA_rivers_2008_2009.nc  remap_weights_runoff_to_NWGOA3_conservative_nomask.nc
+compute_mini_remap_weights.py	 	NGOA_rivers_2010_2011.nc  runoff_1980_1981a.nc
+hack_runoff_clim.py		 			NGOA_rivers_2012_2013.nc  runoff_1982_1983a.nc
+KenaiRiverTemps.dat@		 		NGOA_rivers_2014.nc	      runoff_1984_1985a.nc
+lat_lon.nc			 				NGOA_rivers.nc		   	  runoff_1986_1987a.nc
+make_river_clim.py		 			NGOA_runoff_1980_1981.nc  runoff_1988_1989a.nc
+make_runoff_clim.py		 			NGOA_runoff_1982_1983.nc  runoff_1990_1991a.nc
+make_runoff_mini.py		 			NGOA_runoff_1984_1985.nc  runoff_1992_1993a.nc
+maskedge.out			 			NGOA_runoff_1986_1987.nc  runoff_1994_1995a.nc
+maskedge.py			 				NGOA_runoff_1988_1989.nc  runoff_1996_1997a.nc
+mask_flow.py			 			NGOA_runoff_1990_1991.nc  runoff_1998_1999a.nc
+MINI_runoff_2014.nc		 			NGOA_runoff_1992_1993.nc  runoff_2000_2001a.nc
+NGOA_rivers_1980_1981.nc	 		NGOA_runoff_1994_1995.nc  runoff_2002_2003a.nc
+NGOA_rivers_1982_1983.nc	 		NGOA_runoff_1996_1997.nc  runoff_2004_2005a.nc
+NGOA_rivers_1984_1985.nc	 		NGOA_runoff_1998_1999.nc  runoff_2006_2007a.nc
+NGOA_rivers_1986_1987.nc	 		NGOA_runoff_2000_2001.nc  runoff_2008_2009a.nc
+NGOA_rivers_1988_1989.nc	 		NGOA_runoff_2002_2003.nc  runoff_2010_2011a.nc
+NGOA_rivers_1990_1991.nc	 		NGOA_runoff_2004_2005.nc  runoff_2012_2013a.nc
+NGOA_rivers_1992_1993.nc	 		NGOA_runoff_2006_2007.nc  runoff_2014a.nc
+NGOA_rivers_1994_1995.nc	 		NGOA_runoff_2008_2009.nc  runoff_old/
+NGOA_rivers_1996_1997.nc	 		NGOA_runoff_2010_2011.nc  set_temp.py
+NGOA_rivers_1998_1999.nc	 		NGOA_runoff_2012_2013.nc  set_vshape.py
+NGOA_rivers_2000_2001.nc	 		NGOA_runoff_2014.nc	      squeeze_rivers.py
+
+
+Review the steps:
+
+1) Well, you've got a grid file, right? So you need to create the maskedge.out file, which maps out the coastline
+in your domain. This part is the same as before.
+
+python maskedge.py ../Gridpak/myGrid.nc >maskedge.out
+
+If you feel like removing small islands by editing the maskedge.out file then you won't get freshwater
+appearing offshore.
+
+!!! So I see maskedge.py and maskedge.out in this directory, 

@@ -1,0 +1,503 @@
+clear;
+
+%% get Brian's grid 
+
+% bFile = '/import/c1/VERTMIX/jgpender/roms-kate_svn/PALAU_120C_UH_Direct/InputFiles/frinkiac/fleat_inner_grid.nc';
+bFile = '/import/c1/VERTMIX/jgpender/roms-kate_svn/PALAU_120C_UH_Direct/InputFiles/frinkiac/fleatInner_palauBB_grid.nc';
+% bFile = 'fleat_inner_grid.nc';
+bLon  = nc_varget(bFile,'lon_rho');
+bLat  = nc_varget(bFile,'lat_rho');
+
+
+%% get my first-cut grid
+
+jFile = 'PALAU_800m.nc_firstCut';
+jLon  = nc_varget(jFile,'lon_rho');
+jLat  = nc_varget(jFile,'lat_rho');    
+
+
+%% get my PALAU_120C file
+
+pFile = '/import/c1/VERTMIX/jgpender/roms-kate_svn/PALAU_120C_UH_Direct/InputFiles/Gridpak/PALAU_120C.nc_myORIG';
+pLon  = nc_varget(pFile,'lon_rho');
+pLat  = nc_varget(pFile,'lat_rho');
+
+
+
+%% My tentative boundaries
+
+jLatMin = mean(jLat(1,1));
+jLatMax = mean(jLat(end,1));
+jLonMin = mean(jLon(:,1));
+jLonMax = mean(jLon(:,end));
+
+
+%% find the best corners on Brian's grid
+
+% My PALAU_120C grid is centered on 
+%       lon
+
+dum = (bLon-jLonMin).^2 + (bLat-jLatMin).^2;
+[jLL,iLL] = find(dum == min(dum(:) ));
+
+dum = (bLon-jLonMax).^2 + (bLat-jLatMin).^2;
+[jLR,iLR] = find(dum == min(dum(:) ));
+
+dum = (bLon-jLonMin).^2 + (bLat-jLatMax).^2;
+[jUL,iUL] = find(dum == min(dum(:) ));
+
+dum = (bLon-jLonMax).^2 + (bLat-jLatMax).^2;
+[jUR,iUR] = find(dum == min(dum(:) ));
+
+% geodesic_dist(bLon(jLL,iLL),bLat(jLL,iLL),bLon(jLR,iLR),bLat(jLR,iLR))/2500
+% geodesic_dist(bLon(200,iLL),bLat(200,iLL),bLon(200,iLR),bLat(200,iLR))/2500
+
+% The above process has correctly found that 
+%   jUL = jUR
+%   jLL = jLR
+% but it is also giving this:
+%   iUL != iUR
+%   iLL != iLR
+
+% Try a different method.
+
+aaa=5;
+
+%% Pause a second here
+
+% Brian's grid does not fall right on longitude lines because the lines
+% converge as you travel north and he wants the E/W extent of each cell to
+% remain at 2500 km.
+% 
+% I can find the physical extent of my PALAU_120C grid (xl and el
+% variables)
+%       width  (xi  direction)      555895 m
+%       height (eta direction)      499520 m
+
+% find my PALAU_120C minimum latitude and go 25km farther south
+dum = (  bLat(:,1) - (min(pLat(:)) - 25/111)  ).^2;
+[jBmin,~] = find(dum == min(dum(:)))
+
+% find my PALAU_120C maximum latitude and go 25km farther north
+dum = (  bLat(:,1) - (max(pLat(:)) + 25/111)  ).^2;
+[jBmax,~] = find(dum == min(dum(:)))
+
+% find my PALAU_120C minimum longitude and go 25km farther west
+dum = (  bLon(120,:) - (min(pLon(:)) - 25/111)  ).^2;
+[~,iBmin] = find(dum == min(dum(:)))
+
+% find my PALAU_120C maximum longitude and go 25km farther east
+dum = (  bLon(120,:) - (max(pLon(:)) + 25/111)  ).^2;
+[~,iBmax] = find(dum == min(dum(:)))
+
+
+% iBmin = iBmin-1;
+% iBmax = iBmax+1;
+% jBmin = jBmin-1;
+% jBmax = jBmax+1;
+
+% So what are the dimensions of this box?
+
+Wedge = geodesic_dist(bLon(jBmin,iBmin),bLat(jBmin,iBmin),bLon(jBmax,iBmin),bLat(jBmax,iBmin))
+Sedge = geodesic_dist(bLon(jBmin,iBmin),bLat(jBmin,iBmin),bLon(jBmin,iBmax),bLat(jBmin,iBmax))
+Eedge = geodesic_dist(bLon(jBmin,iBmax),bLat(jBmin,iBmax),bLon(jBmax,iBmax),bLat(jBmax,iBmax))
+Nedge = geodesic_dist(bLon(jBmax,iBmin),bLat(jBmax,iBmin),bLon(jBmax,iBmax),bLat(jBmax,iBmax))
+
+% If you subtract off 25km from all sides, how many 800m intervals do you
+% get?
+
+Nedge - 50000;ans/800
+Sedge - 50000;ans/800
+Eedge - 50000;ans/800
+Wedge - 50000;ans/800
+
+aaa=5;
+
+
+%% Make an executive decision
+
+% Fix the number of 800m intervals at
+
+i800 = 690;
+j800 = 620;
+
+iLL = iBmin;
+iLR = iBmax;
+iUL = iBmin;
+iUR = iBmax;
+
+jLL = jBmin;
+jLR = jBmin;
+jUL = jBmax;
+jUR = jBmax;
+
+
+% My southern boundary will lie on this latitude of Brian's grid
+latS = bLat(jLL,iLL)
+% bLat(jLR,iLR)
+
+% My northern boundary will lie on this latitude of Brian's grid
+latN = bLat(jUL,iUL)
+% bLat(jUR,iUR)
+
+% My western boundary will lie on one of Brian's grid columns but the
+% longitide will vary with latitude. Linearly, which is lucky.
+
+% My eastern boundary will also lie on one of Brian's grid columns, and, 
+% again, the longitide will vary linearly with latitude. 
+
+
+
+%%  Southern boundary 
+
+% The central longitude is
+lonCenS = ( bLon(jLR,iLR) + bLon(jLL,iLL) )/2
+
+% calculate the number of meters per degree, then the 800m intervals in degrees
+mpDeg = geodesic_dist(bLon(jLL,iLL),bLat(jLL,iLL),bLon(jLR,iLR),bLat(jLR,iLR)) / ( bLon(jLR,iLR) - bLon(jLL,iLL) );
+dLon800S = 800/mpDeg;
+dLon2500S = 2500/mpDeg;
+
+% There will be i800/2 of the intervals to the RHS of the central
+% longitude. I want to telesope the remainder out to the maximum longitude.
+
+zTelS = bLon(jLR,iLR) - lonCenS - i800/2 * dLon800S;
+
+% The transition region has the first dz set at dlon800S, and the subsequent
+% dz values get larger and larger until they get to the edge. The
+% sum of these dz values has to equal the length of the transition region calculated
+% above. I've used MMA to devise a scheme that
+% finds the slope of the line to machine precision using
+%   nTerms=<pick something>
+%   Table[dLon800N + (i-1) C, {i,nTerms}]
+%   NumberForm[Solve[Apply[Plus,%] == zTel, C],15]
+% You try different values of nTerms until you find the value that gives
+% the largest final interval that is still smaller than dLon2500N.
+%
+% For the sourthern edge, nTerms is 19
+% NOTE: you have to use the same value for nTerms for the northern edge
+
+nTerms = 16;
+
+C = .000935874947360176;
+
+[dLon800S:C:dLon800S+(nTerms-1)*C]
+sum(ans) - zTelS
+
+
+% Now construct the entire dzLon
+
+% The set of intervals to the right of the center latitude is
+
+[dLon800S*ones(1,i800/2) [dLon800S:C:dLon800S+(nTerms-1)*C] ];
+
+% so the set of longitudes larger than the center latitude is 
+
+rhsS = lonCenS + cumsum(  [dLon800S*ones(1,i800/2) [dLon800S:C:dLon800S+(nTerms-1)*C] ]   )  ;
+
+% so the set of longitudes smaller than the center latitude is 
+
+lhsS = lonCenS - fliplr(cumsum(  [dLon800S*ones(1,i800/2) [dLon800S:C:dLon800S+(nTerms-1)*C] ]   ))  ;
+
+% and the total set of allowed longitudes is
+
+myLonS =[lhsS, lonCenS , rhsS  ];
+
+fig(1);clf;plot(myLonS)
+fig(2);clf;plot(diff(myLonS))
+
+% a few checks
+myLonS(1)   - bLon(jLL,iLL)
+myLonS(end) - bLon(jLR,iLR)
+length(myLonS)
+
+geodesic_dist(bLon(jLL,iLL),bLat(jLL,iLL),bLon(jLR,iLR),bLat(jLR,iLR))
+geodesic_dist(myLonS(1),bLat(jLL,iLL),myLonS(end),bLat(jLR,iLR))
+
+aaa=5;
+
+
+%%  Northern boundary 
+
+% The central longitude is
+lonCenN = ( bLon(jUR,iUR) + bLon(jUL,iUL) )/2
+
+% calculate the number of meters per degree, then the 800m intervals in degrees
+mpDeg = geodesic_dist(bLon(jUL,iUL),bLat(jUL,iUL),bLon(jUR,iUR),bLat(jUR,iUR)) / ( bLon(jUR,iUR) - bLon(jUL,iUL) );
+dLon800N = 800/mpDeg;
+dLon2500N = 2500/mpDeg;
+
+% There will be i800/2 of the intervals to the RHS of the central
+% longitude. I want to telesope the remainder out to the maximum longitude.
+
+zTelN = bLon(jUR,iUR) - lonCenN - i800/2 * dLon800N;
+
+% The transition region has the first dz set at dlon800S, and the subsequent
+% dz values get larger and larger until they get to the edge. The
+% sum of these dz values has to equal the length of the transition region calculated
+% above. I've used MMA to devise a scheme that
+% finds the slope of the line to machine precision using
+%   nTerms=<pick something>
+%   Table[dLon800N + (i-1) C, {i,nTerms}]
+%   NumberForm[Solve[Apply[Plus,%] == zTel, C],15]
+% You try different values of nTerms until you find the value that gives
+% the largest final interval that is still smaller than dLon2500N.
+%
+% For the sourthern edge, nTerms is 19
+% NOTE: you have to use the same value for nTerms for the northern edge
+
+% nTerms = 19;
+
+C = .000946654366707014;
+
+[dLon800N:C:dLon800N+(nTerms-1)*C]
+sum(ans) - zTelN
+
+
+% Now construct the entire dzLon
+
+% The set of intervals to the right of the center latitude is
+
+[dLon800N*ones(1,i800/2) [dLon800N:C:dLon800N+(nTerms-1)*C] ];
+
+% so the set of longitudes larger than the center latitude is 
+
+rhsN = lonCenN + cumsum(  [dLon800N*ones(1,i800/2) [dLon800N:C:dLon800N+(nTerms-1)*C] ]   )  ;
+
+% so the set of longitudes smaller than the center latitude is 
+
+lhsN = lonCenN - fliplr(cumsum(  [dLon800N*ones(1,i800/2) [dLon800N:C:dLon800N+(nTerms-1)*C] ]   ))  ;
+
+% and the total set of allowed longitudes is
+
+myLonN =[lhsN, lonCenN , rhsN  ];
+
+fig(3);clf;plot(myLonN)
+fig(4);clf;plot(diff(myLonN))
+
+% a few checks
+myLonN(1)   - bLon(jUL,iUL)
+myLonN(end) - bLon(jUR,iUR)
+length(myLonN)
+
+
+geodesic_dist(bLon(jUL,iUL),bLat(jUL,iUL),bLon(jUR,iUR),bLat(jUR,iUR))
+geodesic_dist(myLonN(1),bLat(jUL,iUL),myLonN(end),bLat(jUR,iUR))
+
+aaa=5;
+
+
+%%  Western boundary 
+
+% The central latitude is
+latCenW = ( bLat(jUL,iUL) + bLat(jLL,iLL) )/2
+
+% calculate the number of meters per degree, then the 800m intervals in degrees
+mpDeg = geodesic_dist(bLon(jLL,iLL),bLat(jLL,iLL),bLon(jUL,iUL),bLat(jUL,iUL)) / ( bLat(jUL,iUL) - bLat(jLL,iLL) );
+dLat800W = 800/mpDeg;
+dLat2500W = 2500/mpDeg;
+
+% There will be i800/2 of the intervals to the RHS of the central
+% longitude. I want to telesope the remainder out to the maximum longitude.
+
+zTelW = bLat(jUL,iUL) - latCenW - j800/2 * dLat800W
+
+% The transition region has the first dz set at dlon800S, and the subsequent
+% dz values get larger and larger until they get to the edge. The
+% sum of these dz values has to equal the length of the transition region calculated
+% above. I've used MMA to devise a scheme that
+% finds the slope of the line to machine precision using
+%   nTerms=<pick something>
+%   Table[dLon800N + (i-1) C, {i,nTerms}]
+%   NumberForm[Solve[Apply[Plus,%] == zTel, C],15]
+% You try different values of nTerms until you find the value that gives
+% the largest final interval that is still smaller than dLon2500N.
+%
+% For the sourthern edge, nTerms is 19
+% NOTE: you have to use the same value for nTerms for the northern edge
+
+nTerms = 16;
+
+C = .000913814559122521;
+
+[dLat800W:C:dLat800W+(nTerms-1)*C]
+sum(ans) - zTelW
+
+
+% Now construct the entire dzLon
+
+% The set of intervals to the right of the center latitude is
+
+[dLat800W*ones(1,j800/2) [dLat800W:C:dLat800W+(nTerms-1)*C] ];
+
+% so the set of longitudes larger than the center latitude is 
+
+rhsW = latCenW + cumsum(  [dLat800W*ones(1,j800/2) [dLat800W:C:dLat800W+(nTerms-1)*C] ]   )  ;
+
+% so the set of longitudes smaller than the center latitude is 
+
+lhsW = latCenW - fliplr(cumsum(  [dLat800W*ones(1,j800/2) [dLat800W:C:dLat800W+(nTerms-1)*C] ]   ))  ;
+
+% and the total set of allowed longitudes is
+
+myLatW =[lhsW, latCenW , rhsW  ];
+
+fig(5);clf;plot(myLatW)
+fig(6);clf;plot(diff(myLatW))
+
+
+% Now pair the latitudes with longitudes, because the longitudes vary as
+% you go north.
+
+myLonW = interp1(bLat(:,iBmin),bLon(:,iBmin),myLatW);
+
+% a few checks
+myLatW(1)   - bLat(jLL,iLL)
+myLatW(end) - bLat(jUL,iUL)
+length(myLatW)
+
+geodesic_dist(bLon(jLL,iLL),bLat(jLL,iLL),bLon(jUL,iUL),bLat(jUL,iUL))
+geodesic_dist(myLonW(1),myLatW(1),myLonW(end),myLatW(end))
+
+aaa=5;
+
+
+%%  Eastern boundary 
+
+% The central latitude is
+latCenE = ( bLat(jUR,iUR) + bLat(jLR,iLR) )/2
+
+% calculate the number of meters per degree, then the 800m intervals in degrees
+mpDeg = geodesic_dist(bLon(jLR,iLR),bLat(jLR,iLR),bLon(jUR,iUR),bLat(jUR,iUR)) / ( bLat(jUR,iUR) - bLat(jLR,iLR) );
+dLat800E = 800/mpDeg;
+dLat2500E = 2500/mpDeg;
+
+% There will be i800/2 of the intervals to the RHS of the central
+% longitude. I want to telesope the remainder out to the maximum longitude.
+
+zTelE = bLat(jUR,iUR) - latCenE - j800/2 * dLat800E
+
+% The transition region has the first dz set at dlon800S, and the subsequent
+% dz values get larger and larger until they get to the edge. The
+% sum of these dz values has to equal the length of the transition region calculated
+% above. I've used MMA to devise a scheme that
+% finds the slope of the line to machine precision using
+%   nTerms=<pick something>
+%   Table[dLon800N + (i-1) C, {i,nTerms}]
+%   NumberForm[Solve[Apply[Plus,%] == zTel, C],15]
+% You try different values of nTerms until you find the value that gives
+% the largest final interval that is still smaller than dLon2500N.
+%
+% For the sourthern edge, nTerms is 19
+% NOTE: you have to use the same value for nTerms for the northern edge
+
+nTerms = 16;
+
+C = .000918429385030389;
+
+[dLat800E:C:dLat800E+(nTerms-1)*C]
+sum(ans) - zTelE
+
+
+% Now construct the entire dzLon
+
+% The set of intervals to the right of the center latitude is
+
+[dLat800E*ones(1,j800/2) [dLat800E:C:dLat800E+(nTerms-1)*C] ];
+
+% so the set of longitudes larger than the center latitude is 
+
+rhsE = latCenE + cumsum(  [dLat800E*ones(1,j800/2) [dLat800E:C:dLat800E+(nTerms-1)*C] ]   )  ;
+
+% so the set of longitudes smaller than the center latitude is 
+
+lhsE = latCenE - fliplr(cumsum(  [dLat800E*ones(1,j800/2) [dLat800E:C:dLat800E+(nTerms-1)*C] ]   ))  ;
+
+% and the total set of allowed longitudes is
+
+myLatE =[lhsE, latCenE , rhsE  ];
+
+fig(7);clf;plot(myLatE)
+fig(8);clf;plot(diff(myLatE))
+
+
+% Now pair the latitudes with longitudes, because the longitudes vary as
+% you go north.
+
+myLonE = interp1(bLat(:,iBmax),bLon(:,iBmax),myLatE);
+
+% a few checks
+myLatE(1)   - bLat(jLR,iLR)
+myLatE(end) - bLat(jUR,iUR)
+length(myLatE)
+
+geodesic_dist(bLon(jLR,iLR),bLat(jLR,iLR),bLon(jUR,iUR),bLat(jUR,iUR))
+geodesic_dist(myLonE(1),myLatE(1),myLonE(end),myLatE(end))
+
+aaa=5;
+
+
+%% Create the coast.in file
+
+% the data write begins in the upper left corner, runs counterclockwise
+% until you get back (almost) to the starting point.
+
+
+nx=length(myLonS); ny=length(myLatW);
+
+%
+dumWest = zeros(ny-1,2);
+for jj=1:ny-1
+    dumWest(jj,1) = myLatW(end-jj+1);
+    dumWest(jj,2) = myLonW(end-jj+1);
+end
+
+
+dumSouth = zeros(nx-1,2);
+for ii=1:nx-1
+    dumSouth(ii,1) = bLat(jLL,iLL);
+    dumSouth(ii,2) = myLonS(ii);
+end
+
+dumEast = zeros(ny-1,2);
+for jj=1:ny-1
+    dumEast(jj,1) = myLatE(jj);
+    dumEast(jj,2) = myLonE(jj);
+end
+
+% dumNorth needs one more entry at the end to close the rectangle
+dumNorth = zeros(nx,2);
+for ii=1:nx
+    dumNorth(ii,1) = bLat(jUL,iUL);
+    dumNorth(ii,2) = myLonN(end-ii+1);
+end
+
+coast = vertcat(dumWest,dumSouth,dumEast,dumNorth);
+
+['Include/gridparam.h:  Lm=',num2str(nx-1),'   Mm=',num2str(ny-1)]
+L
+save('coast.in','coast','-ascii')
+
+
+%% Compare Brian's grid to my final grid file
+
+myFinal = 'PALAU_800m.nc';
+
+
+myLat = nc_varget(myFinal,'lat_rho');
+myLon = nc_varget(myFinal,'lon_rho');
+
+%%
+
+
+fig(10);clf;
+plot(bLon(:,iBmin),bLat(:,iBmin) );hold on;
+plot(bLon(:,iBmax),bLat(:,iBmax) )
+plot(bLon(jBmin,:),bLat(jBmin,:) )
+plot(bLon(jBmax,:),bLat(jBmax,:) )
+plot(myLon(:,1),myLat(:,1),'r' )
+plot(myLon(:,end),myLat(:,end),'r' )
+plot(myLon(1,:),myLat(1,:),'r' )
+plot(myLon(end,:),myLat(end,:),'r' )
+
+

@@ -1,0 +1,97 @@
+#!/bin/bash
+
+\rm *.nc
+
+now=`date -d "-6 days" "+%Y%m%d"`
+echo $now
+
+window=12
+hours=( $(seq -w 0 3 $window)) 
+nSnapshots=${#hours[@]}
+echo "nSnapshots = $nSnapshots"
+
+
+
+
+\rm out*.nc
+# Uwind
+for ((ii=0;ii<$nSnapshots;ii+=1));
+do
+#	echo $ii  ${hours[$ii]}
+	outFile=out_${hours[$ii]}.nc
+    urlFile=url_${hours[$ii]}.txt
+#	echo $outFile
+
+	part1="https://rda.ucar.edu/thredds/ncss/grid/files/g/ds084.1/2022/"
+#	echo "part1:    $part1"
+
+	part2="$now/gfs.0p25."
+#	echo "part2:    $part2"
+
+    part3=$now"00.f0"
+#    echo "part3:    $part3"
+
+	part4="${hours[$ii]}.grib2?var=u-component_of_wind_height_above_ground&north=17&west=141&east=148&south=11&horizStride=1&time_start="
+#	echo "part4:    $part4"
+	
+	datePlus=`date -d "$now + ${hours[$ii]} hours" "+%Y-%m-%dT%H:%M:%S"`
+#	echo $datePlus
+
+	part5=$datePlus"Z&time_end="
+#	echo "part5:    $part5"
+
+    part6=$datePlus"Z&timeStride=1&vertCoord=1&accept=netcdf3&addLatLon=true"
+#    echo "part6:    $part6"
+
+	echo $part1$part2$part3$part4$part5$part6 > $urlFile
+	wget -O $outFile -i $urlFile
+
+	timeVar=`ncdump -h $outFile | grep time | head -1 |   tr -d '\t' | cut -d ' ' -f1`	
+#	echo ""
+#	echo $timeVar
+#	echo ""
+
+	ncrename -O -h -d $timeVar,wind_time	$outFile
+	ncrename -O -h -v $timeVar,wind_time    $outFile
+	ncks 	--mk_rec_dmn wind_time -O 		$outFile $outFile
+	ncrename -O -h -v	u-component_of_wind_height_above_ground,Uwind $outFile
+
+
+done
+
+ncrcat out*.nc Uwind.nc
+
+\rm out*.nc url*.txt
+
+
+
+exit
+
+
+
+
+
+
+
+
+
+cat out*.grib2 >> forecast.grib2
+ncl_convert2nc forecast.grib2
+
+
+exit
+\rm out*.grib2 url_*
+
+
+exit
+
+
+wget 
+http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25_1hr.pl'?'file'='gfs.t00z.pgrb2.0p25.f0
+"$hour_padded"'&'lev_10_m_above_ground'='on'&'var_UGRD'='on'&'var_VGRD'='on'&'subregion'=&'leftlon'='"$lon_min"'&'rightlon'='"$lon_max"'&'toplat'='"$lat_max"'&'bottomlat'='"$lat_min"'&'dir'=%'2F
+
+gfs."$now"00 
+
+
+
+-O ./tmp/"$hour".grib2 --waitretry=1

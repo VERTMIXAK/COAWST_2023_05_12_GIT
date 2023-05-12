@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=t2standard
+#SBATCH --ntasks=288
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=96:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+
+mkdir netcdfOutput
+cp ../../InputFiles/Gridpak_paveIsland/GUAMB_1km_paveIsland.nc .
+mpirun -np 288  coawstROMSonly ./Apps/ocean_guamb_1km.in > log
+bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log
+cp log netcdfOutput
+cp Apps/ocean*.in  netcdfOutput

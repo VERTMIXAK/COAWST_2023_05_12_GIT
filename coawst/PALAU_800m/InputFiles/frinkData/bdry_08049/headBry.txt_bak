@@ -1,0 +1,15 @@
+import matplotlib
+matplotlib.use('Agg')
+
+import subprocess
+import os
+import sys
+#import commands
+import numpy as np
+
+import pycnal
+import pycnal_toolbox
+
+src_varname = ['zeta','temp','salt','u','v','ubar','vbar']
+
+

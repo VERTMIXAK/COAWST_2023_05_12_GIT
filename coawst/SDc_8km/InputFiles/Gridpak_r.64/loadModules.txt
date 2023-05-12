@@ -1,0 +1,31 @@
+module purge
+module load data/netCDF-Fortran/4.4.4-foss-2016b
+module load data/NCL/6.4.0-binary-centos6
+module load vis/cairo/1.14.10-foss-2016b
+
+
+export PATH=$PATH\:~/bin:.
+
+export LD_LIBRARY_PATH=$HOME/PyCNAL_fromKate/site-packages:$LD_LIBRARY_PATH
+
+export ARCHIVE2=/import/c1/VERTMIX/jgpender
+
+export PYCNAL_GRIDID_FILE=$HOME/Python/gridid.txt
+export PYCNAL_GRID_FILE=$HOME/Python/gridid.txt
+export PYCNAL_PATH=$HOME/Python
+export XCOASTDATA=/import/c1/VERTMIX/jgpender/ROMS/BathyData/world_int.cst
+export ETOPO2=/import/c1/VERTMIX/jgpender/ROMS/BathyData/etopo2.Gridpak.nc
+export TOPO30=/import/c1/VERTMIX/jgpender/ROMS/BathyData/topo30.Gridpak_TS.nc
+export TOPO30TS=/import/c1/VERTMIX/jgpender/ROMS/BathyData/topo30.Gridpak_TS.nc
+export INDIANO2=/import/c1/VERTMIX/jgpender/ROMS/BathyData/indiano2.Gridpak.nc
+export PALAU=/import/c1/VERTMIX/jgpender/ROMS/BathyData/Palau_Harper_gridpak.nc
+export NISKINE=/import/c1/VERTMIX/jgpender/ROMS/BathyData/topo30.Gridpak_NISKINE.nc
+export SO=/import/c1/VERTMIX/jgpender/ROMS/BathyData/topo30.Gridpak_SO.nc
+export SCSA=/import/c1/VERTMIX/jgpender/ROMS/BathyData/topo30.Gridpak_SCSA.nc
+export IBCAO=/import/c1/VERTMIX/jgpender/ROMS/BathyData/IBCAO.Gridpak_Barrow.nc
+export SEAK=/import/c1/VERTMIX/jgpender/ROMS/BathyData/topo30.Gridpak_SEAK.nc
+#export SEAK=/import/c1/VERTMIX/jgpender/roms-kate_svn/SEAK_1km/InputFiles/Gridpak/modifiedTopo30/topo30.Gridpak_SEAK_shiftSmooth.nc
+
+export PYROMS_PATH=$HOME/Python_pyroms
+
+umask 0027

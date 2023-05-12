@@ -1,0 +1,10 @@
+
+
+
+
+fig(2);clf;pcolor(hCrho);shading flat;colorbar
+% caxis([5760 5820])
+
+fig(3);clf;pcolor(hCrho - h);shading flat;colorbar
+
+nc_varput(newFile,'h',hCrho);

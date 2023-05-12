@@ -1,0 +1,1 @@
+ scp jgpender@frinkiac.oceanmodeling.net:/share/tempest2/gliu87/fleat/ncfiles/FRC/fleat-gfs-2013-2022.nc .

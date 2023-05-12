@@ -1,0 +1,12 @@
+river_CaCO3
+river_Ldetritus
+river_NO3
+river_TIC
+river_alkalinity
+river_detritus
+river_oxygen
+river_phytoplankton
+river_salt
+river_temp
+river_transport
+river_zooplankton

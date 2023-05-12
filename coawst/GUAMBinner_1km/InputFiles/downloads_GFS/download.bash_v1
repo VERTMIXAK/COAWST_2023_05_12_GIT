@@ -1,0 +1,42 @@
+#!/bin/bash
+
+module load
+
+now=`date -d "-5 days" "+%Y%m%d"`
+
+echo $now
+
+window=12
+hours=( $(seq -w 0 3 $window)) 
+nSnapshots=${#hours[@]}
+
+echo "nSnapshots = $nSnapshots"
+
+#\rm url.* *.nc *.grib2
+
+
+
+
+# TMP, SPFH, VGRD, UGRD, PRES, TCDC, PRATE
+for ((ii=0;ii<$nSnapshots;ii+=1));
+do
+	echo $ii  ${hours[$ii]}
+	outFile=out_${hours[$ii]}.grib2
+    urlFile=url_${hours[$ii]}.grib2
+	echo $outFile
+
+	part1="https://nomads.ncep.noaa.gov/cgi-bin/filter_gdas_0p25.pl?file=gdas.t00z.pgrb2.0p25.f0"
+
+	part2="${hours[$ii]}&all_lev=on&var_ALBDO=on&var_DLWRF=on&var_DSWRF=on&var_PRATE=on&var_PRES=on&var_SPFH=on&var_TCDC=on&var_TMP=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon=141&rightlon=148&toplat=17&bottomlat=11&dir=%2Fgdas."
+
+	part3="%2F00%2Fatmos"
+
+	echo $part1$part2$now$part3 > $urlFile
+	wget -O $outFile -i url.txt
+
+done
+
+cat out*.grib2 >> forecast.grib2
+\rm out*.grib2
+
+

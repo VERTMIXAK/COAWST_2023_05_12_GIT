@@ -1,0 +1,1 @@
+https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?file=gfs.t00z.pgrb2.0p25.f000&all_lev=on&var_PRES=on&var_SPFH=on&var_TMP=on&var_UGRD=on&var_VGRD=on&leftlon=141&rightlon=148&toplat=17&bottomlat=11&dir=%2Fgfs.20220110%2F00%2Fatmos

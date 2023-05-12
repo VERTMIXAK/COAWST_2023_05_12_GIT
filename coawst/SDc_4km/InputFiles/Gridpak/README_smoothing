@@ -1,0 +1,31 @@
+chinook> bathsuds 
+ There are            4  bathymetries.
+ Which level would you like to read?
+2
+  udeg   =   1.7453514039516449E-002
+  uscale =   6370719.0926123476     
+  Enter number of passes of filter:
+1
+           1  rmax =   0.70316144416630910       at (i,j):           69          10
+ depths:    50.835985365774469        291.68006833889484        122.23002359884246     
+
+ JGP print gridfile SDc_4km.nc                                                                      
+ There are            4  bathymetries.
+ Which level would you like to write to?
+3
+chinook> bathsoap 
+ There are            4  bathymetries.
+ Which level would you like to read?
+3
+  udeg   =   1.7453514039516449E-002
+  uscale =   6370719.0926123476     
+
+ How many passes of the shapiro filter?
+1
+           1  rmax =   0.60063901590467594       at (i,j):           70           9
+
+ JGP print gridfile SDc_4km.nc                                                                      
+ There are            4  bathymetries.
+ Which level would you like to write to?
+4
+

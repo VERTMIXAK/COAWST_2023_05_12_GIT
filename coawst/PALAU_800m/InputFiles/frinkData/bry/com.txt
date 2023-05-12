@@ -1,0 +1,1 @@
+ scp jgpender@frinkiac.oceanmodeling.net:/share/tempest2/gliu87/fleat/fleat_mk_800m_bry/output/bry/palau_ini_08199.nc .

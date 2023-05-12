@@ -1,0 +1,1 @@
+http://pae-paha.pacioos.hawaii.edu/thredds/ncss/wrf_cnmi/WRF_CNMI_Regional_Atmospheric_Model_best.ncd?var=swrad&north=17&west=142&east=148&south=11&disableProjSubset=on&horizStride=1&time_start=2021-11-20T00%3A00%3A00Z&time_end=2022-01-02T00%3A00%3A00Z&timeStride=1&addLatLon=true

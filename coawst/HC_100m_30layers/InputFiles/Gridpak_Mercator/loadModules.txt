@@ -1,0 +1,8 @@
+module purge
+module load data/netCDF-Fortran/4.4.4-foss-2016b
+module load data/NCL/6.4.0-binary-centos6
+module load vis/cairo/1.14.10-foss-2016b
+
+
+export PSDEM2000=../bathyGridpak/psdem2000.Gridpak.nc
+#export BASEMAPDATA=.

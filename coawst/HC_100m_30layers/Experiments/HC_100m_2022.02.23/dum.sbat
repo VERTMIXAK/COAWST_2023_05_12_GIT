@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --partition=t2small
+#SBATCH --ntasks=4
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=06:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+
+
+cd parse
+
+module purge
+. /etc/profile.d/modules.sh
+module load matlab/R2013a
+
+matlab -nodisplay -nosplash < parse1.m  > log1 &
+matlab -nodisplay -nosplash < parse2.m  > log2 &
+matlab -nodisplay -nosplash < parse3.m  > log3 &
+matlab -nodisplay -nosplash < parse4.m  > log4 &
+matlab -nodisplay -nosplash < parse5.m  > log5 &
+
+wait 
+
+/bin/bash moveFiles.bash
+

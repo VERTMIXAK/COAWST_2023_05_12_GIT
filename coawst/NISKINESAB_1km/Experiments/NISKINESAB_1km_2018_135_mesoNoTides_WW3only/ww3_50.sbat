@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --partition=t2standard
+#SBATCH --ntasks=100
+#SBATCH --mail-user=jgpender@alaska.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --time=12:00:00
+#SBATCH --output=roms.%j
+source ~/.runROMSintel
+ulimit -l unlimited
+ulimit -s unlimited
+/bin/rm -r  netcdfOutput log nodes.* roms.*
+mkdir netcdfOutput
+
+
+#cp `grep GRDNAME Apps/ocean*.in | grep -v '!' | cut -d "=" -f3` .
+
+
+cd WW3_DT50
+#mpirun -np 20  ../coawstM ww3_grid.inp > ../log
+mpirun -np 100  ../coawstM ww3_grid.inp > log
+
+
+#bash /import/VERTMIXFS/jgpender/roms-kate_svn/addl_Scripts/timeROMS/getRunTime.bash >> log
+
+
+~/coawst/WW3/model/exe/ww3_ounf
+#mv ww3.*.nc ../netcdfOutput
+
+#cp ../log ../netcdfOutput

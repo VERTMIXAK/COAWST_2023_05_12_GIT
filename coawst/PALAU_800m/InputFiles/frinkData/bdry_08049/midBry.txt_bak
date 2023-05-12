@@ -1,0 +1,11 @@
+src_grd = pycnal.grid.get_ROMS_grid('PALAU_BrianFull')
+dst_grd = pycnal.grid.get_ROMS_grid('PALAU_800m')
+
+print('wts_file = ',wts_file)
+
+
+#data_dir = '../perigeeData/'
+#print(data_dir)
+
+lst_file = []
+

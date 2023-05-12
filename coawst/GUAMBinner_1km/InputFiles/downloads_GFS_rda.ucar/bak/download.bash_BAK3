@@ -1,0 +1,274 @@
+#!/bin/bash
+
+\rm *.nc url*.txt
+
+now=`date -d "-6 days" "+%Y%m%d"`
+echo $now
+
+window=15
+hours=( $(seq -w 0 3 $window)) 
+nSnapshots=${#hours[@]}
+echo "nSnapshots = $nSnapshots"
+
+
+####### swrad	WARNING !!! 6-hour ave means take only every other point,
+##############  DO SOMETHING ABOUT ENDPOINTS
+
+for ((ii=1;ii<$nSnapshots;ii+=2));
+do
+#   echo $ii  ${hours[$ii]}
+    outFile=out_${hours[$ii]}.nc
+    urlFile=url_${hours[$ii]}.txt
+#   echo $outFile
+
+    part1="https://rda.ucar.edu/thredds/ncss/grid/files/g/ds084.1/2022/"
+#   echo "part1:    $part1"
+
+    part2="$now/gfs.0p25."
+#   echo "part2:    $part2"
+
+    part3=$now"00.f0"
+#    echo "part3:    $part3"
+
+    part4="${hours[$ii]}.grib2?var=Downward_Short-Wave_Radiation_Flux_surface_3_Hour_Average&north=17&west=141&east=148&south=11&horizStride=1&time_start="
+#   echo "part4:    $part4"
+
+    datePlus=`date -d "$now + ${hours[$ii]} hours" "+%Y-%m-%dT%H:%M:%S"`
+#   echo $datePlus
+
+    part5=$datePlus"Z&time_end="
+#   echo "part5:    $part5"
+
+    part6=$datePlus"Z&timeStride=1&vertCoord=&accept=netcdf3&addLatLon=true"
+#    echo "part6:    $part6"
+
+    echo $part1$part2$part3$part4$part5$part6 > $urlFile
+    wget -O $outFile -i $urlFile
+
+    timeVar=`ncdump -h $outFile | grep time | head -1 |   tr -d '\t' | cut -d ' ' -f1`
+   echo ""
+   echo $timeVar
+   echo ""
+
+	boundsVar=`ncdump -h out_03.nc | grep bounds | grep double | cut -d '(' -f1 | rev | cut -d ' ' -f1 | rev`
+	echo $boundsVar
+	echo ""
+
+    ncrename -O -h -d $timeVar,srf_time    $outFile
+    ncrename -O -h -v $timeVar,srf_time    $outFile
+    ncks    --mk_rec_dmn srf_time -O       $outFile $outFile
+    ncrename -O -h -v   Downward_Short-Wave_Radiation_Flux_surface_3_Hour_Average,swrad $outFile
+    ncrename -O -h -v   time1_bounds,time_bounds $outFile
+
+done
+
+ncrcat out*.nc swrad.nc
+\rm out*.nc url*.txt
+
+exit
+
+
+
+
+
+####### Qair
+for ((ii=0;ii<$nSnapshots;ii+=1));
+do
+#   echo $ii  ${hours[$ii]}
+    outFile=out_${hours[$ii]}.nc
+    urlFile=url_${hours[$ii]}.txt
+#   echo $outFile
+
+    part1="https://rda.ucar.edu/thredds/ncss/grid/files/g/ds084.1/2022/"
+#   echo "part1:    $part1"
+
+    part2="$now/gfs.0p25."
+#   echo "part2:    $part2"
+
+    part3=$now"00.f0"
+#    echo "part3:    $part3"
+
+    part4="${hours[$ii]}.grib2?var=Specific_humidity_height_above_ground&north=17&west=141&east=148&south=11&horizStride=1&time_start="
+#   echo "part4:    $part4"
+
+    datePlus=`date -d "$now + ${hours[$ii]} hours" "+%Y-%m-%dT%H:%M:%S"`
+#   echo $datePlus
+
+    part5=$datePlus"Z&time_end="
+#   echo "part5:    $part5"
+
+    part6=$datePlus"Z&timeStride=1&vertCoord=1&accept=netcdf3&addLatLon=true"
+#    echo "part6:    $part6"
+
+    echo $part1$part2$part3$part4$part5$part6 > $urlFile
+    wget -O $outFile -i $urlFile
+
+    timeVar=`ncdump -h $outFile | grep time | head -1 |   tr -d '\t' | cut -d ' ' -f1`
+#   echo ""
+#   echo $timeVar
+#   echo ""
+
+    ncrename -O -h -d $timeVar,qair_time    $outFile
+    ncrename -O -h -v $timeVar,qair_time    $outFile
+    ncks    --mk_rec_dmn qair_time -O       $outFile $outFile
+    ncrename -O -h -v   Specific_humidity_height_above_ground,Qair $outFile
+done
+
+exit
+
+ncrcat out*.nc Qair.nc
+\rm out*.nc url*.txt
+
+exit
+
+
+
+
+
+
+
+
+####### Tair
+for ((ii=0;ii<$nSnapshots;ii+=1));
+do
+#   echo $ii  ${hours[$ii]}
+    outFile=out_${hours[$ii]}.nc
+    urlFile=url_${hours[$ii]}.txt
+#   echo $outFile
+
+    part1="https://rda.ucar.edu/thredds/ncss/grid/files/g/ds084.1/2022/"
+#   echo "part1:    $part1"
+
+    part2="$now/gfs.0p25."
+#   echo "part2:    $part2"
+
+    part3=$now"00.f0"
+#    echo "part3:    $part3"
+
+    part4="${hours[$ii]}.grib2?var=Temperature_height_above_ground&north=17&west=141&east=148&south=11&horizStride=1&time_start="
+#   echo "part4:    $part4"
+
+    datePlus=`date -d "$now + ${hours[$ii]} hours" "+%Y-%m-%dT%H:%M:%S"`
+#   echo $datePlus
+
+    part5=$datePlus"Z&time_end="
+#   echo "part5:    $part5"
+
+    part6=$datePlus"Z&timeStride=1&vertCoord=1&accept=netcdf3&addLatLon=true"
+#    echo "part6:    $part6"
+
+    echo $part1$part2$part3$part4$part5$part6 > $urlFile
+    wget -O $outFile -i $urlFile
+
+    timeVar=`ncdump -h $outFile | grep time | head -1 |   tr -d '\t' | cut -d ' ' -f1`
+#   echo ""
+#   echo $timeVar
+#   echo ""
+
+    ncrename -O -h -d $timeVar,tair_time    $outFile
+    ncrename -O -h -v $timeVar,tair_time    $outFile
+    ncks    --mk_rec_dmn tair_time -O       $outFile $outFile
+    ncrename -O -h -v   Temperature_height_above_ground,Tair $outFile
+done
+ncrcat out*.nc Tair.nc
+/bin/bash Kelvin2Celsius.bash
+\rm out*.nc url*.txt
+\rm Tair_Kelvin.nc
+
+
+
+
+
+
+####### Uwind
+for ((ii=0;ii<$nSnapshots;ii+=1));
+do
+#	echo $ii  ${hours[$ii]}
+	outFile=out_${hours[$ii]}.nc
+    urlFile=url_${hours[$ii]}.txt
+#	echo $outFile
+
+	part1="https://rda.ucar.edu/thredds/ncss/grid/files/g/ds084.1/2022/"
+#	echo "part1:    $part1"
+
+	part2="$now/gfs.0p25."
+#	echo "part2:    $part2"
+
+    part3=$now"00.f0"
+#    echo "part3:    $part3"
+
+	part4="${hours[$ii]}.grib2?var=u-component_of_wind_height_above_ground&north=17&west=141&east=148&south=11&horizStride=1&time_start="
+#	echo "part4:    $part4"
+	
+	datePlus=`date -d "$now + ${hours[$ii]} hours" "+%Y-%m-%dT%H:%M:%S"`
+#	echo $datePlus
+
+	part5=$datePlus"Z&time_end="
+#	echo "part5:    $part5"
+
+    part6=$datePlus"Z&timeStride=1&vertCoord=1&accept=netcdf3&addLatLon=true"
+#    echo "part6:    $part6"
+
+	echo $part1$part2$part3$part4$part5$part6 > $urlFile
+	wget -O $outFile -i $urlFile
+
+	timeVar=`ncdump -h $outFile | grep time | head -1 |   tr -d '\t' | cut -d ' ' -f1`	
+#	echo ""
+#	echo $timeVar
+#	echo ""
+
+	ncrename -O -h -d $timeVar,wind_time	$outFile
+	ncrename -O -h -v $timeVar,wind_time    $outFile
+	ncks 	--mk_rec_dmn wind_time -O 		$outFile $outFile
+	ncrename -O -h -v	u-component_of_wind_height_above_ground,Uwind $outFile
+done
+ncrcat out*.nc Uwind.nc
+\rm out*.nc url*.txt
+
+
+
+####### Vwind
+for ((ii=0;ii<$nSnapshots;ii+=1));
+do
+#   echo $ii  ${hours[$ii]}
+    outFile=out_${hours[$ii]}.nc
+    urlFile=url_${hours[$ii]}.txt
+#   echo $outFile
+
+    part1="https://rda.ucar.edu/thredds/ncss/grid/files/g/ds084.1/2022/"
+#   echo "part1:    $part1"
+
+    part2="$now/gfs.0p25."
+#   echo "part2:    $part2"
+
+    part3=$now"00.f0"
+#    echo "part3:    $part3"
+
+    part4="${hours[$ii]}.grib2?var=v-component_of_wind_height_above_ground&north=17&west=141&east=148&south=11&horizStride=1&time_start="
+#   echo "part4:    $part4"
+
+    datePlus=`date -d "$now + ${hours[$ii]} hours" "+%Y-%m-%dT%H:%M:%S"`
+#   echo $datePlus
+
+    part5=$datePlus"Z&time_end="
+#   echo "part5:    $part5"
+
+    part6=$datePlus"Z&timeStride=1&vertCoord=1&accept=netcdf3&addLatLon=true"
+#    echo "part6:    $part6"
+
+    echo $part1$part2$part3$part4$part5$part6 > $urlFile
+    wget -O $outFile -i $urlFile
+
+    timeVar=`ncdump -h $outFile | grep time | head -1 |   tr -d '\t' | cut -d ' ' -f1`
+#   echo ""
+#   echo $timeVar
+#   echo ""
+
+    ncrename -O -h -d $timeVar,wind_time    $outFile
+    ncrename -O -h -v $timeVar,wind_time    $outFile
+    ncks    --mk_rec_dmn wind_time -O       $outFile $outFile
+    ncrename -O -h -v   v-component_of_wind_height_above_ground,Vwind $outFile
+done
+ncrcat out*.nc Vwind.nc
+\rm out*.nc url*.txt
+
